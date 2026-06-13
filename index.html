@@ -1,685 +1,468 @@
 <!--
   ============================================================================
-  KAGIROVA ART — My Travel Sketchbook  (website template)
+  KAGIROVA ART — Travel sketchbook & print shop   (marsketcher-style, v3)
   ----------------------------------------------------------------------------
-  HOW TO MAKE THIS YOURS (no coding needed for the basics):
+  PLACEHOLDER IMAGES: the prints, collection tiles and hero use random photos
+  from a free service (picsum.photos) just so the layout looks full. Replace
+  them with your own scans — every image path lives in the CONFIG block at the
+  bottom (search "EDIT HERE"). Put your files in an "images" folder next to
+  this file and write e.g.  image:"images/banff.jpg".
 
-  1. PHOTOS & SKETCHES  ->  see the CONFIG block at the bottom of this file
-     (search for "EDIT HERE"). Replace the placeholder washes with your own
-     images like this:
-         image: "images/banff-cafe.jpg"
-     Put your image files in a folder called "images" next to this file.
+  LOGO: shown as the text "Kagirova Art" in a hand-drawn font for now (no image).
 
-  2. PRICES & "SOLD" labels -> also in the CONFIG block, per sketch.
-
-  3. ADD / REMOVE PLACES -> the LOCATIONS array in the CONFIG block.
-     Each place just needs a name, country, and lat/lng (already filled in).
-
-  4. TEXT (your bio, intros) -> written directly in the page below; search for
-     the word that you want to change and type over it.
-
-  5. The map uses free OpenStreetMap data. If the map looks grey in a preview,
-     that is just a sandbox blocking map tiles — it loads correctly once the
-     site is hosted online.
+  MAP: free OpenStreetMap data, no API key. Default view auto-fits all cities.
   ============================================================================
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kagirova Art — My Travel Sketchbook</title>
-<meta name="description" content="Watercolour travel sketches painted on location across 16 countries. Open-edition prints and one-of-a-kind originals by Kagi.">
+<title>Kagirova Art — Travel Sketchbook</title>
+<meta name="description" content="Travel illustrator and watercolour artist. Sketches painted on location, sold as prints and one-of-a-kind originals.">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    /* ---- palette pulled from Kagi's painting + the desk it sits on ---- */
-    --ink:#2c2620;            /* line work / text */
-    --ink-soft:#5f564b;
-    --paper:#fbf6ec;          /* sketchbook page */
-    --paper-edge:#efe6d4;
-    --desk-1:#a08868;         /* tabletop */
-    --desk-2:#7d6448;
-    --terracotta:#d2693c;     /* the orange cup  -> primary accent */
-    --teal:#4d918a;           /* the plate */
-    --sage:#8ea763;           /* foliage */
-    --sky:#9cc3d6;            /* the sky wash */
-    --ochre:#c79145;          /* prices / highlights */
-    --plum:#9c6b86;           /* extra well */
-
-    --maxw:1180px;
-    --r:14px;
-    --shadow:0 18px 40px -22px rgba(40,30,18,.55);
-    --shadow-lift:0 28px 55px -22px rgba(40,30,18,.6);
-    --tape:rgba(245,238,210,.62);
-    --font-display:"Fraunces",Georgia,serif;
-    --font-body:"Hanken Grotesk",system-ui,sans-serif;
-    --font-hand:"Caveat",cursive;
+    --ink:#1f1c19;
+    --soft:#6f685f;
+    --line:#e9e5dd;
+    --bg:#ffffff;
+    --cream:#f6f2ea;
+    --accent:#c2643b;        /* warm watercolour accent, used sparingly */
+    --teal:#3f8a82;
+    --maxw:1240px;
+    --font:"Jost",system-ui,sans-serif;
+    --logo:"Cabin Sketch",system-ui,cursive;
   }
-
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{
-    margin:0;
-    font-family:var(--font-body);
-    color:var(--ink);
-    line-height:1.6;
-    background:
-      radial-gradient(120% 80% at 50% -10%, #b89a76 0%, var(--desk-1) 42%, var(--desk-2) 100%);
-    background-attachment:fixed;
-    -webkit-font-smoothing:antialiased;
-  }
-  /* faint paper grain over the whole desk */
-  body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+  body{margin:0;font-family:var(--font);font-weight:300;color:var(--ink);background:var(--bg);
+    line-height:1.6;-webkit-font-smoothing:antialiased}
   img{max-width:100%;display:block}
-  a{color:inherit}
-  h1,h2,h3{font-family:var(--font-display);font-weight:500;line-height:1.05;margin:0}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;position:relative;z-index:1}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-weight:400;margin:0;line-height:1.1;letter-spacing:.01em}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px}
+  .logo-font{font-family:var(--logo);font-weight:700;letter-spacing:.01em}
 
-  .hand{font-family:var(--font-hand);font-weight:600}
-  .eyebrow{
-    font-family:var(--font-hand);font-size:1.5rem;color:var(--terracotta);
-    transform:rotate(-3deg);display:inline-block;margin-bottom:.2em;
-  }
+  /* eyebrow / section titles */
+  .eyebrow{font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);font-weight:500}
+  .sec-title{font-size:clamp(1.5rem,3vw,2.1rem);font-weight:400;letter-spacing:.04em;text-align:center;margin:.4rem 0 0}
+  .sec-head{text-align:center;margin-bottom:34px}
 
-  /* ---------------- top bar ---------------- */
-  header.nav{
-    position:sticky;top:0;z-index:50;
-    backdrop-filter:blur(8px);
-    background:linear-gradient(to bottom, rgba(125,100,72,.92), rgba(125,100,72,.7));
-    border-bottom:1px solid rgba(255,255,255,.12);
-  }
-  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
-  .brand{display:flex;align-items:baseline;gap:.5rem;text-decoration:none;color:var(--paper)}
-  .brand b{font-family:var(--font-display);font-weight:600;font-size:1.25rem;letter-spacing:.01em}
-  .brand span{font-family:var(--font-hand);font-size:1.1rem;color:#f3e3c9;opacity:.9}
-  nav.links{display:flex;gap:1.6rem;align-items:center}
-  nav.links a{
-    color:#f6ecda;text-decoration:none;font-weight:500;font-size:.95rem;
-    opacity:.85;transition:opacity .2s;
-  }
+  /* ---------- nav ---------- */
+  header.nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.9);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .nav .brand{font-family:var(--logo);font-weight:700;font-size:1.5rem;letter-spacing:.02em}
+  nav.links{display:flex;gap:2rem;align-items:center}
+  nav.links a{font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;font-weight:400;color:var(--ink);
+    opacity:.8;transition:opacity .2s}
   nav.links a:hover{opacity:1}
-  nav.links a.cta{
-    background:var(--terracotta);color:#fff;padding:.5rem .9rem;border-radius:999px;
-    opacity:1;box-shadow:0 6px 16px -8px rgba(0,0,0,.6);
-  }
-  .menu-btn{display:none;background:none;border:0;color:var(--paper);font-size:1.5rem;cursor:pointer}
+  .menu-btn{display:none;background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--ink)}
 
-  /* ---------------- hero: open sketchbook on the desk ---------------- */
-  .hero{padding:46px 0 30px}
-  .palette-bar{display:flex;gap:6px;justify-content:center;margin-bottom:22px}
-  .well{
-    width:34px;height:26px;border-radius:5px;
-    box-shadow:inset 0 -3px 5px rgba(0,0,0,.25), inset 0 2px 3px rgba(255,255,255,.4);
-    border:2px solid rgba(255,255,255,.5);
-  }
-  .book{
-    display:grid;grid-template-columns:1fr 1fr;gap:0;
-    background:var(--paper);
-    border-radius:6px;
-    box-shadow:var(--shadow);
-    position:relative;
-    overflow:hidden;
-  }
-  /* the central spine */
-  .book::after{
-    content:"";position:absolute;left:50%;top:0;bottom:0;width:36px;transform:translateX(-50%);
-    background:linear-gradient(to right,
-      rgba(0,0,0,0) 0%, rgba(60,45,25,.10) 40%, rgba(60,45,25,.16) 50%, rgba(60,45,25,.10) 60%, rgba(0,0,0,0) 100%);
-    pointer-events:none;
-  }
-  .page{padding:44px 40px}
-  .page-left{border-right:1px solid var(--paper-edge)}
-  .hero h1{font-size:clamp(2.4rem,5vw,3.7rem);letter-spacing:-.01em}
-  .hero h1 i{font-style:italic;color:var(--terracotta)}
-  .lede{font-size:1.08rem;color:var(--ink-soft);max-width:34ch;margin:1.1rem 0 1.6rem}
-  .hero-actions{display:flex;gap:.7rem;flex-wrap:wrap}
-  .btn{
-    display:inline-flex;align-items:center;gap:.45rem;
-    font-weight:600;font-size:.95rem;text-decoration:none;cursor:pointer;
-    padding:.7rem 1.15rem;border-radius:999px;border:1.5px solid var(--ink);
-    background:var(--ink);color:var(--paper);transition:transform .15s, box-shadow .2s;
-  }
-  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 20px -12px rgba(0,0,0,.6)}
-  .btn.ghost{background:transparent;color:var(--ink)}
-  .stat-row{display:flex;gap:1.8rem;margin-top:1.9rem;flex-wrap:wrap}
-  .stat b{font-family:var(--font-display);font-size:1.6rem;display:block;line-height:1}
-  .stat small{color:var(--ink-soft);font-size:.82rem}
+  /* ---------- hero ---------- */
+  .hero{position:relative;height:86vh;min-height:520px;display:flex;align-items:center;justify-content:center;
+    text-align:center;color:#fff;overflow:hidden}
+  .hero .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,12,.18),rgba(20,16,12,.42));z-index:1}
+  .hero .inner{position:relative;z-index:2;padding:0 20px}
+  .hero h1{font-family:var(--logo);font-weight:700;font-size:clamp(3rem,9vw,6.5rem);
+    text-shadow:0 2px 24px rgba(0,0,0,.35);line-height:.95}
+  .hero .tag{font-size:clamp(1rem,2vw,1.35rem);font-weight:300;letter-spacing:.18em;text-transform:uppercase;
+    margin-top:1rem;text-shadow:0 1px 10px rgba(0,0,0,.4)}
+  .hero .btns{display:flex;gap:.8rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
 
-  /* the featured painting on the right page */
-  .feature-art{position:relative}
-  .art-frame{
-    border-radius:4px;overflow:hidden;aspect-ratio:4/5;position:relative;
-    box-shadow:0 10px 26px -16px rgba(0,0,0,.6);
-  }
-  .art-frame img{width:100%;height:100%;object-fit:cover}
-  .tape{
-    position:absolute;width:88px;height:26px;background:var(--tape);
-    box-shadow:0 1px 3px rgba(0,0,0,.18);z-index:2;
-  }
-  .tape.tl{top:-10px;left:14px;transform:rotate(-7deg)}
-  .tape.br{bottom:-10px;right:18px;transform:rotate(-5deg)}
-  .art-note{font-family:var(--font-hand);font-size:1.35rem;color:var(--ink-soft);transform:rotate(-2deg);margin-top:.7rem}
-  .sig{font-family:var(--font-hand);font-weight:700;font-size:1.1rem;border:1.5px solid var(--ink);display:inline-block;padding:.1rem .4rem;line-height:1;margin-top:.6rem}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font);font-weight:400;font-size:.78rem;
+    letter-spacing:.18em;text-transform:uppercase;cursor:pointer;padding:.85rem 1.6rem;border:1px solid var(--ink);
+    background:var(--ink);color:#fff;transition:background .2s,color .2s,transform .15s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.light{background:rgba(255,255,255,.95);color:var(--ink);border-color:#fff}
+  .btn.outline{background:transparent;color:#fff;border-color:rgba(255,255,255,.85)}
+  .btn.outline:hover{background:#fff;color:var(--ink)}
+  .btn.ink-outline{background:transparent;color:var(--ink)}
 
-  /* ---------------- generic section card on the desk ---------------- */
-  .sheet{
-    background:var(--paper);border-radius:var(--r);box-shadow:var(--shadow);
-    padding:42px 38px;margin:34px auto;
-  }
-  .section-head{margin-bottom:1.6rem;max-width:60ch}
-  .section-head h2{font-size:clamp(1.7rem,3.4vw,2.5rem)}
-  .section-head p{color:var(--ink-soft);margin:.5rem 0 0}
+  /* ---------- products ---------- */
+  section.block{padding:74px 0}
+  .products{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+  .product{display:flex;flex-direction:column}
+  .product .pic{aspect-ratio:4/5;overflow:hidden;background:var(--cream);position:relative}
+  .product .pic img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+  .product:hover .pic img{transform:scale(1.04)}
+  .product .sold{position:absolute;top:12px;left:12px;background:var(--accent);color:#fff;font-size:.62rem;
+    letter-spacing:.12em;text-transform:uppercase;padding:.3rem .55rem}
+  .product h3{font-size:1.05rem;font-weight:400;margin-top:14px;letter-spacing:.02em}
+  .product .place{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:3px}
+  .product .price{font-size:.95rem;margin-top:6px}
+  .product .price .orig{color:var(--soft);font-size:.82rem}
+  .product .add{margin-top:12px;align-self:flex-start}
+  .center-cta{text-align:center;margin-top:46px}
 
-  /* ---------------- map ---------------- */
-  .map-layout{display:grid;grid-template-columns:1fr 270px;gap:22px}
-  #map{
-    height:480px;border-radius:10px;border:1px solid var(--paper-edge);
-    background:#dce8ee; /* sea colour, in case tiles are blocked */
-    box-shadow:inset 0 2px 8px rgba(0,0,0,.12);
-  }
-  .legend h3{font-family:var(--font-display);font-size:1.05rem;margin-bottom:.2rem}
-  .legend .hint{font-family:var(--font-hand);font-size:1.15rem;color:var(--terracotta);margin-bottom:.7rem}
-  .country-list{list-style:none;margin:0;padding:0;max-height:430px;overflow:auto}
-  .country-list li button{
-    width:100%;display:flex;align-items:center;gap:.55rem;text-align:left;
-    background:none;border:0;cursor:pointer;padding:.4rem .3rem;border-radius:8px;
-    font:inherit;color:var(--ink);transition:background .15s;
-  }
-  .country-list li button:hover{background:#f4ecdb}
-  .dot{width:13px;height:13px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);flex:none;
-       box-shadow:0 2px 4px rgba(0,0,0,.25)}
-  .country-list .count{margin-left:auto;color:var(--ink-soft);font-size:.85rem}
+  /* ---------- collections (region tiles) ---------- */
+  .collections{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .tile{position:relative;aspect-ratio:3/4;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+  .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s;z-index:0}
+  .tile:hover img{transform:scale(1.06)}
+  .tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.5));z-index:1}
+  .tile span{position:relative;z-index:2;color:#fff;font-size:1rem;letter-spacing:.16em;text-transform:uppercase;
+    padding-bottom:24px;text-align:center}
+  .tile small{display:block;opacity:.85;font-size:.68rem;letter-spacing:.1em;margin-top:4px}
 
-  /* custom leaflet marker = a little paint dab */
-  .pin{width:18px;height:18px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-       border:2px solid #fff;box-shadow:0 3px 6px rgba(0,0,0,.35);transition:transform .15s}
-  .pin:hover{transform:rotate(-45deg) scale(1.25)}
-  .leaflet-tooltip.tt{
-    font-family:var(--font-hand);font-size:1.15rem;font-weight:600;color:var(--ink);
-    background:var(--paper);border:1px solid var(--paper-edge);border-radius:6px;
-    box-shadow:var(--shadow);padding:1px 8px;
-  }
+  /* ---------- full-bleed map ---------- */
+  .map-section{padding:0}
+  .map-head{text-align:center;padding:74px 26px 30px}
+  #mapView{width:100%;height:78vh;min-height:480px;background:#dfe8ec;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .pin-circle{width:44px;height:44px;border-radius:50%;background:#fff center/cover no-repeat;display:flex;
+    align-items:center;justify-content:center;font-size:22px;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.3);
+    transition:transform .15s;overflow:hidden}
+  .pin-circle:hover{transform:scale(1.18)}
+  .leaflet-tooltip.tt{font-family:var(--font);font-weight:400;font-size:.82rem;letter-spacing:.06em;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:0;box-shadow:0 6px 18px -10px rgba(0,0,0,.4);padding:3px 10px}
   .leaflet-tooltip.tt::before{display:none}
+  .map-note{text-align:center;padding:22px 26px 6px;color:var(--soft);font-size:.85rem;letter-spacing:.04em}
 
-  /* ---------------- shop / gallery ---------------- */
-  .price-key{font-family:var(--font-hand);font-size:1.2rem;color:var(--ink-soft);margin-top:.4rem}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:1.6rem}
-  .card{
-    background:#fff;border-radius:10px;overflow:hidden;
-    box-shadow:0 10px 24px -18px rgba(0,0,0,.5);
-    border:1px solid var(--paper-edge);
-    transition:transform .18s, box-shadow .2s;display:flex;flex-direction:column;
-  }
-  .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lift)}
-  .card .thumb{aspect-ratio:4/5;position:relative}
-  .card .thumb img{width:100%;height:100%;object-fit:cover}
-  .badge{position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;
-         font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-         padding:.25rem .55rem;border-radius:6px}
-  .badge.sold{background:var(--terracotta)}
-  .card .body{padding:16px 18px 20px;display:flex;flex-direction:column;gap:.35rem;flex:1}
-  .card .place{font-family:var(--font-hand);font-size:1.15rem;color:var(--terracotta);line-height:1}
-  .card h3{font-size:1.2rem}
-  .card .blurb{color:var(--ink-soft);font-size:.9rem;flex:1}
-  .price-row{display:flex;gap:8px;margin-top:.6rem}
-  .chip{
-    flex:1;border:1.5px solid var(--paper-edge);border-radius:9px;padding:.5rem .6rem;
-    text-align:left;background:#fbf7ee;cursor:pointer;transition:border-color .15s, background .15s;
-  }
-  .chip small{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}
-  .chip b{font-family:var(--font-display);font-size:1.05rem}
-  .chip:hover{border-color:var(--ochre);background:#fff}
-  .chip.disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
-  .buy{margin-top:.7rem;width:100%;justify-content:center}
+  /* ---------- postcard band ---------- */
+  .band{position:relative;color:#fff;text-align:center;padding:90px 26px;overflow:hidden}
+  .band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .band::after{content:"";position:absolute;inset:0;background:rgba(28,22,16,.5);z-index:1}
+  .band .inner{position:relative;z-index:2}
+  .band h2{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:300;letter-spacing:.05em;max-width:20ch;margin:0 auto}
 
-  /* ---------------- journal ---------------- */
-  .journal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:1.4rem}
-  .entry{display:flex;flex-direction:column}
-  .entry .ph{aspect-ratio:3/2;border-radius:10px;overflow:hidden;box-shadow:0 8px 20px -16px rgba(0,0,0,.5)}
-  .entry .ph img{width:100%;height:100%;object-fit:cover}
-  .entry .date{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:.9rem}
-  .entry h3{font-family:var(--font-hand);font-weight:700;font-size:1.5rem;color:var(--ink);margin:.1rem 0 .3rem}
-  .entry p{color:var(--ink-soft);font-size:.95rem;margin:0}
-  .entry a{color:var(--terracotta);font-weight:600;text-decoration:none;font-size:.9rem;margin-top:.4rem}
+  /* ---------- about teaser ---------- */
+  .about{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch;border:1px solid var(--line)}
+  .about .photo{min-height:380px;background:var(--cream)}
+  .about .photo img{width:100%;height:100%;object-fit:cover}
+  .about .txt{padding:56px 52px;display:flex;flex-direction:column;justify-content:center}
+  .about .txt h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:400;letter-spacing:.03em;margin-bottom:1rem}
+  .about .txt p{color:var(--soft);font-weight:300;margin:0 0 1rem}
+  .about .sign{font-family:var(--logo);font-weight:700;font-size:1.4rem;margin-top:.4rem}
 
-  /* ---------------- about ---------------- */
-  .about{display:grid;grid-template-columns:1fr 1.3fr;gap:34px;align-items:center}
-  .about .portrait{aspect-ratio:1;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);position:relative}
-  .about .portrait img{width:100%;height:100%;object-fit:cover}
-  .about p{color:var(--ink-soft);margin:.7rem 0}
-  .about .sig{margin-top:.4rem}
+  /* ---------- journal ---------- */
+  .journal{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+  .jentry .ph{aspect-ratio:3/2;overflow:hidden;background:var(--cream)}
+  .jentry .ph img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+  .jentry:hover .ph img{transform:scale(1.04)}
+  .jentry .date{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:14px;display:block}
+  .jentry h3{font-size:1.15rem;font-weight:400;margin:6px 0 6px}
+  .jentry p{color:var(--soft);font-weight:300;font-size:.92rem;margin:0}
 
-  /* ---------------- footer ---------------- */
-  footer{padding:46px 0 60px;color:#f3e7d4;position:relative;z-index:1}
-  .foot-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:34px;align-items:start}
-  footer h3{font-family:var(--font-display);color:var(--paper);font-size:1.5rem}
-  footer p{opacity:.85;max-width:42ch}
-  .news{display:flex;gap:.5rem;margin-top:.9rem;max-width:380px}
-  .news input{flex:1;border:0;border-radius:999px;padding:.65rem 1rem;font:inherit}
-  .news .btn{border-color:var(--terracotta);background:var(--terracotta)}
-  .socials{display:flex;gap:1.1rem;margin-top:1rem}
-  .socials a{color:#f3e7d4;text-decoration:none;opacity:.85;font-weight:600}
-  .socials a:hover{opacity:1}
-  .foot-rule{border:0;border-top:1px solid rgba(255,255,255,.18);margin:34px 0 18px}
-  .copy{display:flex;justify-content:space-between;font-size:.82rem;opacity:.7;flex-wrap:wrap;gap:.5rem}
+  /* ---------- footer ---------- */
+  footer{background:var(--cream);padding:66px 0 40px;text-align:center;margin-top:0}
+  footer .brand{font-family:var(--logo);font-weight:700;font-size:1.9rem}
+  footer .ftag{font-weight:300;letter-spacing:.04em;color:var(--soft);max-width:34ch;margin:14px auto 0}
+  .fsoc{display:flex;gap:1.6rem;justify-content:center;margin:22px 0}
+  .fsoc a{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase}
+  .fcopy{font-size:.74rem;letter-spacing:.08em;color:var(--soft);border-top:1px solid var(--line);padding-top:22px;margin-top:22px}
 
-  /* ---------------- reveal animation ---------------- */
-  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s ease}
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s,transform .7s}
   .reveal.in{opacity:1;transform:none}
 
-  /* ---------------- responsive ---------------- */
-  @media(max-width:880px){
-    nav.links{position:fixed;inset:64px 0 auto 0;flex-direction:column;background:var(--desk-2);
-      padding:1rem 22px 1.4rem;gap:1rem;display:none}
+  @media(max-width:980px){
+    nav.links{position:fixed;inset:72px 0 auto 0;flex-direction:column;background:#fff;padding:1.2rem 26px 1.6rem;
+      gap:1.3rem;display:none;border-bottom:1px solid var(--line)}
     nav.links.open{display:flex}
     .menu-btn{display:block}
-    .book{grid-template-columns:1fr}
-    .page-left{border-right:0;border-bottom:1px solid var(--paper-edge)}
-    .book::after{display:none}
-    .map-layout{grid-template-columns:1fr}
-    .grid{grid-template-columns:repeat(2,1fr)}
-    .journal-grid{grid-template-columns:1fr}
+    .products{grid-template-columns:repeat(2,1fr)}
+    .collections{grid-template-columns:repeat(2,1fr)}
+    .journal{grid-template-columns:1fr}
     .about{grid-template-columns:1fr}
-    .foot-grid{grid-template-columns:1fr}
+    .about .photo{min-height:300px}
   }
-  @media(max-width:560px){
-    .grid{grid-template-columns:1fr}
-    .page{padding:30px 24px}
-    .sheet{padding:30px 22px}
+  @media(max-width:520px){
+    .products{grid-template-columns:repeat(2,1fr);gap:18px}
+    .about .txt{padding:36px 26px}
   }
   @media(prefers-reduced-motion:reduce){
-    *{scroll-behavior:auto}
-    .reveal{transition:none;opacity:1;transform:none}
-    .card,.btn{transition:none}
+    *{scroll-behavior:auto}.reveal{transition:none;opacity:1;transform:none}
+    .product .pic img,.tile img,.jentry .ph img,.btn{transition:none}
   }
 </style>
 
-<!-- ======================= NAV ======================= -->
+<!-- ===================== NAV ===================== -->
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#top"><b>Kagirova&nbsp;Art</b><span>travel sketchbook</span></a>
+    <a class="brand" href="#top">Kagirova Art</a>
     <button class="menu-btn" aria-label="Menu" aria-expanded="false">☰</button>
     <nav class="links" id="links">
+      <a href="#shop">Shop</a>
+      <a href="#collections">Collections</a>
       <a href="#map">Map</a>
-      <a href="#shop">Prints &amp; originals</a>
       <a href="#journal">Journal</a>
       <a href="#about">About</a>
-      <a class="cta" href="#shop">Shop sketches</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
-
-  <!-- ======================= HERO ======================= -->
+  <!-- ===================== HERO ===================== -->
   <section class="hero">
-    <div class="wrap">
-      <div class="palette-bar" aria-hidden="true">
-        <span class="well" style="background:var(--terracotta)"></span>
-        <span class="well" style="background:var(--ochre)"></span>
-        <span class="well" style="background:var(--sage)"></span>
-        <span class="well" style="background:var(--teal)"></span>
-        <span class="well" style="background:var(--sky)"></span>
-        <span class="well" style="background:var(--plum)"></span>
+    <img class="bg" id="heroBg" alt="">
+    <div class="inner">
+      <h1>Kagirova Art</h1>
+      <p class="tag">My travel sketchbook</p>
+      <div class="btns">
+        <a class="btn light" href="#shop">Shop the prints</a>
+        <a class="btn outline" href="#map">See the map</a>
       </div>
+    </div>
+  </section>
 
-      <div class="book reveal">
-        <div class="page page-left">
-          <span class="eyebrow">a watercolour travel diary</span>
-          <h1>Places I sat<br>still long enough<br>to <i>paint</i>.</h1>
-          <p class="lede">I'm Kagi — an urban sketcher chasing light, street food and quiet corners. Every page here was painted on location, in one sitting. Take a print home, or the original page lifted straight from my book.</p>
-          <div class="hero-actions">
-            <a class="btn" href="#shop">Browse the sketches</a>
-            <a class="btn ghost" href="#map">Open the map</a>
-          </div>
-          <div class="stat-row">
-            <span class="stat"><b>16</b><small>countries</small></span>
-            <span class="stat"><b>37</b><small>cities painted</small></span>
-            <span class="stat"><b>1 of 1</b><small>every original</small></span>
-          </div>
-        </div>
+  <!-- ===================== SHOP / MOST POPULAR ===================== -->
+  <section id="shop" class="block">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">From the sketchbook</span>
+        <h2 class="sec-title">Prints &amp; originals</h2>
+      </div>
+      <div class="products" id="shopGrid"></div>
+      <div class="center-cta reveal"><a class="btn ink-outline" href="#">View all work</a></div>
+    </div>
+  </section>
 
-        <div class="page feature-art">
-          <div class="art-frame">
-            <span class="tape tl"></span>
-            <span class="tape br"></span>
-            <!-- Featured painting. Replace this <img> src with your own scan. -->
-            <img alt="Wild Flour Bakery café in Banff, painted in watercolour and ink"
-                 src="" data-wash="banff">
-          </div>
-          <p class="art-note">↳ Wild Flour Bakery, Banff — where it all started over a Nanaimo bar.</p>
-          <span class="sig">KAGI&nbsp;ROVA</span>
+  <!-- ===================== COLLECTIONS ===================== -->
+  <section id="collections" class="block" style="background:var(--cream)">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="eyebrow">Browse by place</span>
+        <h2 class="sec-title">Collections</h2>
+      </div>
+      <div class="collections" id="collGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MAP (full width) ===================== -->
+  <section id="map" class="map-section">
+    <div class="map-head reveal">
+      <span class="eyebrow">16 countries · 37 cities</span>
+      <h2 class="sec-title">Where the pages were painted</h2>
+    </div>
+    <div id="mapView" role="application" aria-label="Map of places painted"></div>
+    <p class="map-note">Hover a pin for the city name. Painted on location, one page at a time.</p>
+  </section>
+
+  <!-- ===================== POSTCARD BAND ===================== -->
+  <section class="band">
+    <img id="bandBg" alt="">
+    <div class="inner reveal">
+      <span class="eyebrow" style="color:#fff;opacity:.9">Postcard club</span>
+      <h2>A hand-painted postcard from wherever I am, mailed to your door.</h2>
+      <div style="margin-top:26px"><a class="btn light" href="#">Join the club</a></div>
+    </div>
+  </section>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section id="about" class="block">
+    <div class="wrap">
+      <div class="about reveal">
+        <div class="photo"><img id="aboutImg" alt="Maria sketching on location"></div>
+        <div class="txt">
+          <span class="eyebrow">Hello, I'm Maria</span>
+          <h2>I paint the places I travel to, on location.</h2>
+          <p>Not the landmarks — the café table, the cup, the dessert I was too curious not to order. Painting on the spot is how I remember a place properly: the light, the queue, the word a stranger taught me.</p>
+          <p>Every page here is yours to take home as a print, or as the one and only original.</p>
+          <span class="sign">— Maria</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ======================= MAP ======================= -->
-  <section id="map-section">
+  <!-- ===================== JOURNAL ===================== -->
+  <section id="journal" class="block" style="background:var(--cream)">
     <div class="wrap">
-      <div class="sheet reveal">
-        <div class="section-head">
-          <span class="eyebrow">the sketchbook, mapped</span>
-          <h2>Where the pages were painted</h2>
-          <p>Every pin is a place I stopped to paint. Tap a country to fly there, or click a pin to see where it is.</p>
-        </div>
-        <div class="map-layout">
-          <div id="map" role="application" aria-label="Map of places painted"></div>
-          <aside class="legend">
-            <h3>Countries</h3>
-            <p class="hint">click to fly →</p>
-            <ul class="country-list" id="countryList"></ul>
-          </aside>
-        </div>
+      <div class="sec-head reveal">
+        <span class="eyebrow">Notes from the table</span>
+        <h2 class="sec-title">Travel journal</h2>
       </div>
-    </div>
-  </section>
-
-  <!-- ======================= SHOP ======================= -->
-  <section id="shop">
-    <div class="wrap">
-      <div class="sheet reveal">
-        <div class="section-head">
-          <span class="eyebrow">take a page home</span>
-          <h2>Prints &amp; originals</h2>
-          <p>Prints are open editions, giclée on cotton rag paper. Originals are the actual page from my sketchbook — there is only ever one of each.</p>
-          <p class="price-key">prices in USD · worldwide shipping · framing optional</p>
-        </div>
-        <div class="grid" id="shopGrid"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================= JOURNAL ======================= -->
-  <section id="journal">
-    <div class="wrap">
-      <div class="sheet reveal">
-        <div class="section-head">
-          <span class="eyebrow">notes from the table</span>
-          <h2>Travel journal</h2>
-          <p>Short impressions written while the paint was still drying — the food, the light, the people who sat down next to me.</p>
-        </div>
-        <div class="journal-grid" id="journalGrid"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================= ABOUT ======================= -->
-  <section id="about">
-    <div class="wrap">
-      <div class="sheet reveal">
-        <div class="about">
-          <div class="portrait">
-            <!-- Replace with a photo of you painting. -->
-            <img alt="Kagi sketching at a café table" src="" data-wash="portrait">
-          </div>
-          <div>
-            <span class="eyebrow">hello, I'm Kagi</span>
-            <h2>An artist who travels with a tiny box of paint.</h2>
-            <p>I never set out to draw landmarks. I draw the table I'm sitting at — the café, the cup, the dessert I'm too curious not to order. Painting on location is how I remember a place properly: the colour of the light, how long the queue was, the word a stranger taught me.</p>
-            <p>I've filled my sketchbook across Asia, the Middle East, Europe and the Americas. This is where those pages live now — yours to take home as a print, or as the one and only original.</p>
-            <span class="sig">KAGI&nbsp;ROVA</span>
-          </div>
-        </div>
-      </div>
+      <div class="journal" id="journalGrid"></div>
     </div>
   </section>
 </main>
 
-<!-- ======================= FOOTER ======================= -->
+<!-- ===================== FOOTER ===================== -->
 <footer>
   <div class="wrap">
-    <div class="foot-grid">
-      <div>
-        <h3>Postcards, not spam</h3>
-        <p>A short note whenever a new city goes up in the shop. A few times a month at most — and the originals usually sell to this list first.</p>
-        <div class="news">
-          <input type="email" aria-label="Your email" placeholder="you@email.com">
-          <button class="btn">Subscribe</button>
-        </div>
-      </div>
-      <div>
-        <h3>Find me</h3>
-        <p>Commissions and gallery enquiries welcome.</p>
-        <div class="socials">
-          <a href="#">Instagram</a>
-          <a href="#">Email</a>
-          <a href="#">Shop</a>
-        </div>
-      </div>
+    <div class="brand">Kagirova Art</div>
+    <p class="ftag">Hand painted on location and printed directly from my sketchbook.</p>
+    <div class="fsoc">
+      <a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Email</a>
     </div>
-    <hr class="foot-rule">
-    <div class="copy">
-      <span>© <span id="yr"></span> Kagirova Art — all sketches painted by hand on location.</span>
-      <span>Made with a tiny box of watercolour.</span>
-    </div>
+    <div class="fcopy">© <span id="yr"></span> Kagirova Art · Maria</div>
   </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ===========================================================================
-   ============================  EDIT HERE  ==================================
-   Everything you'll want to change lives in these two arrays.
+   ===============================  EDIT HERE  ===============================
+   For now images are random placeholders from picsum.photos (free).
+   Replace any "img"/"image" value with your own file, e.g. "images/banff.jpg".
    =========================================================================== */
 
-/* A small set of palette colours, reused per country so the map stays cohesive */
-const PALETTE = ['#d2693c','#4d918a','#8ea763','#9cc3d6','#c79145','#9c6b86'];
+/* helper to build a free random-photo URL (placeholder only) */
+const ph = (seed,w,h)=>`https://picsum.photos/seed/${seed}/${w}/${h}`;
 
-/* --- 1) PLACES ON THE MAP --------------------------------------------------
-   name, country, lat, lng. Add or remove freely. */
-const LOCATIONS = [
-  // Thailand
-  {country:'Thailand', city:'Bangkok',  lat:13.7563, lng:100.5018},
-  {country:'Thailand', city:'Phuket',   lat:7.8804,  lng:98.3923},
-  {country:'Thailand', city:'Krabi',    lat:8.0863,  lng:98.9063},
-  {country:'Thailand', city:'Hua Hin',  lat:12.5684, lng:99.9577},
-  {country:'Thailand', city:'Koh Samui',lat:9.5120,  lng:100.0136},
-  {country:'Thailand', city:'Pattaya',  lat:12.9236, lng:100.8825},
-  // Hong Kong
-  {country:'Hong Kong',city:'Hong Kong',lat:22.3193, lng:114.1694},
-  // South Korea
-  {country:'South Korea',city:'Seoul',  lat:37.5665, lng:126.9780},
-  {country:'South Korea',city:'Busan',  lat:35.1796, lng:129.0756},
-  // Costa Rica
-  {country:'Costa Rica',city:'San José',    lat:9.9281, lng:-84.0907},
-  {country:'Costa Rica',city:'La Fortuna',  lat:10.4673,lng:-84.6427},
-  // Turkey
-  {country:'Turkey',  city:'Istanbul', lat:41.0082, lng:28.9784},
-  {country:'Turkey',  city:'Alanya',   lat:36.5444, lng:31.9956},
-  {country:'Turkey',  city:'Antalya',  lat:36.8969, lng:30.7133},
-  // Israel
-  {country:'Israel',  city:'Tel Aviv', lat:32.0853, lng:34.7818},
-  {country:'Israel',  city:'Jerusalem',lat:31.7683, lng:35.2137},
-  // USA
-  {country:'USA', city:'New York',     lat:40.7128, lng:-74.0060},
-  {country:'USA', city:'Seattle',      lat:47.6062, lng:-122.3321},
-  {country:'USA', city:'San Francisco',lat:37.7749, lng:-122.4194},
-  {country:'USA', city:'Los Angeles',  lat:34.0522, lng:-118.2437},
-  // Malaysia
-  {country:'Malaysia',city:'Kuala Lumpur',lat:3.1390,lng:101.6869},
-  {country:'Malaysia',city:'Langkawi',    lat:6.3500,lng:99.8000},
-  // Singapore
-  {country:'Singapore',city:'Singapore', lat:1.3521, lng:103.8198},
-  // Vietnam
-  {country:'Vietnam', city:'Hanoi',    lat:21.0285, lng:105.8542},
-  {country:'Vietnam', city:'Da Nang',  lat:16.0544, lng:108.2022},
-  // Taiwan
-  {country:'Taiwan',  city:'Taipei',   lat:25.0330, lng:121.5654},
-  {country:'Taiwan',  city:'Hualien',  lat:23.9871, lng:121.6015},
-  // Canada
-  {country:'Canada',  city:'Toronto',  lat:43.6532, lng:-79.3832},
-  {country:'Canada',  city:'Montreal', lat:45.5017, lng:-73.5673},
-  {country:'Canada',  city:'Calgary',  lat:51.0447, lng:-114.0719},
-  {country:'Canada',  city:'Banff',    lat:51.1784, lng:-115.5708},
-  {country:'Canada',  city:'Vancouver',lat:49.2827, lng:-123.1207},
-  // France
-  {country:'France',  city:'Paris',    lat:48.8566, lng:2.3522},
-  // Spain
-  {country:'Spain',   city:'Barcelona',lat:41.3851, lng:2.1734},
-  // Germany
-  {country:'Germany', city:'Berlin',     lat:52.5200, lng:13.4050},
-  {country:'Germany', city:'Düsseldorf', lat:51.2277, lng:6.7735},
-  // Belgium
-  {country:'Belgium', city:'Ghent',    lat:51.0543, lng:3.7174},
-];
+/* big images on the page */
+const HERO_IMAGE  = ph('kagirova-hero', 1920, 1200);   // top full-screen image
+const BAND_IMAGE  = ph('kagirova-band', 1920, 900);    // postcard band
+const ABOUT_IMAGE = ph('kagirova-about', 900, 900);    // about photo
 
-/* --- 2) SKETCHES FOR SALE ---------------------------------------------------
-   image: leave "" to use a coloured placeholder, OR set "images/your-file.jpg".
-   originalSold: true  -> shows the original as sold, only print available. */
+/* ring colours for the map, one per country */
+const PALETTE=['#c2643b','#3f8a82','#86a05f','#9cc3d6','#c2904a','#9c6b86'];
+
+/* --- PRINTS / ORIGINALS FOR SALE ------------------------------------------- */
 const SKETCHES = [
-  {title:'Wild Flour Bakery', place:'Banff, Canada', wash:'banff',
-   blurb:'The café where I first tried a Nanaimo bar. Warm afternoon, orange umbrellas.',
-   print:28, original:240, originalSold:false, image:''},
-  {title:'Sunset Umbrellas', place:'Phuket, Thailand', wash:'phuket',
-   blurb:'Beach loungers folding up as the light went pink. Painted before the rain.',
-   print:26, original:210, originalSold:true, image:''},
-  {title:'Gwangjang Market', place:'Seoul, South Korea', wash:'seoul',
-   blurb:'Steam, plastic stools, a bowl of something I couldn’t name and loved.',
-   print:30, original:265, originalSold:false, image:''},
-  {title:'Gràcia Balconies', place:'Barcelona, Spain', wash:'barcelona',
-   blurb:'Laundry, shutters and a cat. Twenty minutes in a square with a coffee.',
-   print:26, original:220, originalSold:false, image:''},
-  {title:'Ferry Building Morning', place:'San Francisco, USA', wash:'sf',
-   blurb:'Fog burning off, commuters with cups, gulls being dramatic about it.',
-   print:28, original:230, originalSold:false, image:''},
-  {title:'Old City Rooftops', place:'Jerusalem, Israel', wash:'jerusalem',
-   blurb:'Limestone going gold at the end of the day. The quietest five minutes.',
-   print:32, original:290, originalSold:true, image:''},
+  {title:'Wild Flour Bakery', place:'Banff, Canada',     print:28, original:240, originalSold:false, image:ph('banff',800,1000)},
+  {title:'Sunset Umbrellas',  place:'Phuket, Thailand',  print:26, original:210, originalSold:true,  image:ph('phuket',800,1000)},
+  {title:'Gwangjang Market',  place:'Seoul, South Korea',print:30, original:265, originalSold:false, image:ph('seoul',800,1000)},
+  {title:'Gràcia Balconies',  place:'Barcelona, Spain',  print:26, original:220, originalSold:false, image:ph('barcelona',800,1000)},
+  {title:'Ferry Building',    place:'San Francisco, USA',print:28, original:230, originalSold:false, image:ph('sanfrancisco',800,1000)},
+  {title:'Old City Rooftops', place:'Jerusalem, Israel', print:32, original:290, originalSold:true,  image:ph('jerusalem',800,1000)},
+  {title:'Lantern Alley',     place:'Hanoi, Vietnam',    print:26, original:215, originalSold:false, image:ph('hanoi',800,1000)},
+  {title:'Bosphorus Morning', place:'Istanbul, Turkey',  print:30, original:260, originalSold:false, image:ph('istanbul',800,1000)},
 ];
 
-/* --- 3) JOURNAL ENTRIES ----------------------------------------------------- */
+/* --- COLLECTION TILES (by region) ------------------------------------------ */
+const COLLECTIONS = [
+  {name:'South East Asia', count:14, image:ph('sea-collection',900,1200)},
+  {name:'Europe',          count:6,  image:ph('eu-collection',900,1200)},
+  {name:'North America',   count:9,  image:ph('na-collection',900,1200)},
+  {name:'Originals',       count:7,  image:ph('originals',900,1200)},
+];
+
+/* --- JOURNAL --------------------------------------------------------------- */
 const JOURNAL = [
-  {title:'A dessert called a meeting place', place:'Banff, Canada', date:'May 2026', wash:'banff',
-   text:'A Nanaimo bar tasted like two childhood desserts at once. I had to paint the café before I’d finished the coffee.'},
-  {title:'Plastic stools, the best seats', place:'Seoul, South Korea', date:'Mar 2026', wash:'seoul',
-   text:'Markets are the easiest places to sketch — nobody minds, everybody’s busy, and the smell does half the work for you.'},
-  {title:'Twenty minutes in Gràcia', place:'Barcelona, Spain', date:'Sep 2025', wash:'barcelona',
-   text:'I’ve learned to stop where the shade is. A square, a balcony, a cat. That’s usually the whole painting.'},
+  {title:'A dessert called a meeting place', place:'Banff, Canada', date:'May 2026', image:ph('banff-j',900,600),
+   text:'A Nanaimo bar tasted like two childhood desserts at once. I painted the café before I finished the coffee.'},
+  {title:'Plastic stools, the best seats', place:'Seoul, South Korea', date:'Mar 2026', image:ph('seoul-j',900,600),
+   text:'Markets are the easiest places to sketch — everybody is busy, and the smell does half the work for you.'},
+  {title:'Twenty minutes in Gràcia', place:'Barcelona, Spain', date:'Sep 2025', image:ph('barcelona-j',900,600),
+   text:'I stop where the shade is. A square, a balcony, a cat — that is usually the whole painting.'},
+];
+
+/* --- PLACES ON THE MAP (your city list) ------------------------------------
+   Add  img:"images/paris.jpg"  to show a photo in the circle instead of icon. */
+const LOCATIONS = [
+  {country:'Thailand', city:'Bangkok',   lat:13.7563, lng:100.5018, icon:'🛕'},
+  {country:'Thailand', city:'Phuket',    lat:7.8804,  lng:98.3923,  icon:'🏝️'},
+  {country:'Thailand', city:'Krabi',     lat:8.0863,  lng:98.9063,  icon:'🛶'},
+  {country:'Thailand', city:'Hua Hin',   lat:12.5684, lng:99.9577,  icon:'🏖️'},
+  {country:'Thailand', city:'Koh Samui', lat:9.5120,  lng:100.0136, icon:'🌴'},
+  {country:'Thailand', city:'Pattaya',   lat:12.9236, lng:100.8825, icon:'🌊'},
+  {country:'Hong Kong',city:'Hong Kong', lat:22.3193, lng:114.1694, icon:'🌆'},
+  {country:'South Korea',city:'Seoul',   lat:37.5665, lng:126.9780, icon:'🏯'},
+  {country:'South Korea',city:'Busan',   lat:35.1796, lng:129.0756, icon:'🌉'},
+  {country:'Costa Rica',city:'San José',   lat:9.9281,  lng:-84.0907, icon:'🌺'},
+  {country:'Costa Rica',city:'La Fortuna', lat:10.4673, lng:-84.6427, icon:'🌋'},
+  {country:'Turkey',  city:'Istanbul',   lat:41.0082, lng:28.9784,  icon:'🕌'},
+  {country:'Turkey',  city:'Alanya',     lat:36.5444, lng:31.9956,  icon:'🏖️'},
+  {country:'Turkey',  city:'Antalya',    lat:36.8969, lng:30.7133,  icon:'⛵'},
+  {country:'Israel',  city:'Tel Aviv',   lat:32.0853, lng:34.7818,  icon:'🏖️'},
+  {country:'Israel',  city:'Jerusalem',  lat:31.7683, lng:35.2137,  icon:'🕍'},
+  {country:'USA', city:'New York',       lat:40.7128, lng:-74.0060, icon:'🗽'},
+  {country:'USA', city:'Seattle',        lat:47.6062, lng:-122.3321,icon:'🗼'},
+  {country:'USA', city:'San Francisco',  lat:37.7749, lng:-122.4194,icon:'🌉'},
+  {country:'USA', city:'Los Angeles',    lat:34.0522, lng:-118.2437,icon:'🌴'},
+  {country:'Malaysia',city:'Kuala Lumpur',lat:3.1390, lng:101.6869, icon:'🏙️'},
+  {country:'Malaysia',city:'Langkawi',   lat:6.3500,  lng:99.8000,  icon:'🛥️'},
+  {country:'Singapore',city:'Singapore', lat:1.3521,  lng:103.8198, icon:'🦁'},
+  {country:'Vietnam', city:'Hanoi',      lat:21.0285, lng:105.8542, icon:'🛵'},
+  {country:'Vietnam', city:'Da Nang',    lat:16.0544, lng:108.2022, icon:'🌉'},
+  {country:'Taiwan',  city:'Taipei',     lat:25.0330, lng:121.5654, icon:'🏙️'},
+  {country:'Taiwan',  city:'Hualien',    lat:23.9871, lng:121.6015, icon:'⛰️'},
+  {country:'Canada',  city:'Toronto',    lat:43.6532, lng:-79.3832, icon:'🗼'},
+  {country:'Canada',  city:'Montreal',   lat:45.5017, lng:-73.5673, icon:'⛪'},
+  {country:'Canada',  city:'Calgary',    lat:51.0447, lng:-114.0719,icon:'🐎'},
+  {country:'Canada',  city:'Banff',      lat:51.1784, lng:-115.5708,icon:'🏔️'},
+  {country:'Canada',  city:'Vancouver',  lat:49.2827, lng:-123.1207,icon:'🌲'},
+  {country:'France',  city:'Paris',      lat:48.8566, lng:2.3522,   icon:'🗼'},
+  {country:'Spain',   city:'Barcelona',  lat:41.3851, lng:2.1734,   icon:'⛪'},
+  {country:'Germany', city:'Berlin',     lat:52.5200, lng:13.4050,  icon:'🐻'},
+  {country:'Germany', city:'Düsseldorf', lat:51.2277, lng:6.7735,   icon:'🍺'},
+  {country:'Belgium', city:'Ghent',      lat:51.0543, lng:3.7174,   icon:'🏰'},
 ];
 
 /* ===========================================================================
-   ====================  below here: the machinery  =========================
-   (you don't need to edit this to use the template)
+   ==========================  machinery below  =============================
    =========================================================================== */
-
-/* coloured placeholder "wash" so the layout looks finished before you add photos */
-const washCache = {};
-function washDataURI(seed){
-  if(washCache[seed]) return washCache[seed];
-  let h=0; for(const c of seed) h=(h*31+c.charCodeAt(0))>>>0;
-  const a=PALETTE[h%PALETTE.length], b=PALETTE[(h>>3)%PALETTE.length], c=PALETTE[(h>>6)%PALETTE.length];
-  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='480' height='600'>
-    <defs><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' seed='${h%99}'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/><feComposite operator='in' in2='SourceGraphic'/></filter></defs>
-    <rect width='100%' height='100%' fill='%23fbf6ec'/>
-    <circle cx='150' cy='200' r='220' fill='${a}' opacity='.55'/>
-    <circle cx='360' cy='420' r='200' fill='${b}' opacity='.45'/>
-    <circle cx='260' cy='300' r='150' fill='${c}' opacity='.4'/>
-    <rect width='100%' height='100%' filter='url(%23f)' opacity='.25'/>
-  </svg>`.replace(/\n\s*/g,'');
-  const uri='data:image/svg+xml;utf8,'+svg.replace(/#/g,'%23');
-  washCache[seed]=uri; return uri;
+/* soft watercolour fallback if a placeholder photo fails to load */
+function washURI(seed){
+  let h=0;for(const c of String(seed))h=(h*31+c.charCodeAt(0))>>>0;
+  const a=PALETTE[h%6],b=PALETTE[(h>>3)%6],c=PALETTE[(h>>6)%6];
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='480' height='600'><rect width='100%' height='100%' fill='%23f6f2ea'/><circle cx='150' cy='200' r='220' fill='${a}' opacity='.45'/><circle cx='360' cy='420' r='200' fill='${b}' opacity='.4'/><circle cx='250' cy='300' r='150' fill='${c}' opacity='.35'/></svg>`;
+  return 'data:image/svg+xml;utf8,'+svg.replace(/#/g,'%23');
 }
-function fillWash(img){ if(!img.getAttribute('src')) img.src = washDataURI(img.dataset.wash||'x'); }
-document.querySelectorAll('img[data-wash]').forEach(fillWash);
+function loadImg(el,src,seed){if(!el)return;el.onerror=()=>{el.onerror=null;el.src=washURI(seed)};el.src=src;}
 
-/* country -> colour map */
+loadImg(document.getElementById('heroBg'),HERO_IMAGE,'hero');
+loadImg(document.getElementById('bandBg'),BAND_IMAGE,'band');
+loadImg(document.getElementById('aboutImg'),ABOUT_IMAGE,'about');
+
 const countries=[...new Set(LOCATIONS.map(l=>l.country))];
-const colourOf={}; countries.forEach((c,i)=>colourOf[c]=PALETTE[i%PALETTE.length]);
-
-/* ---- SHOP ---- */
+const colourOf={};countries.forEach((c,i)=>colourOf[c]=PALETTE[i%PALETTE.length]);
 const money=n=>'$'+n.toLocaleString();
-document.getElementById('shopGrid').innerHTML = SKETCHES.map(s=>{
-  const img = s.image ? s.image : washDataURI(s.wash||s.title);
-  const sold = s.originalSold;
-  return `<article class="card">
-    <div class="thumb">
-      ${sold?'<span class="badge sold">Original sold</span>':'<span class="badge">1 of 1 original</span>'}
-      <img alt="${s.title} — ${s.place}" src="${img}">
-    </div>
-    <div class="body">
-      <span class="place">${s.place}</span>
-      <h3>${s.title}</h3>
-      <p class="blurb">${s.blurb}</p>
-      <div class="price-row">
-        <button class="chip"><small>Print</small><b>${money(s.print)}</b></button>
-        <button class="chip ${sold?'disabled':''}" ${sold?'disabled aria-disabled="true"':''}>
-          <small>Original</small><b>${sold?'Sold':money(s.original)}</b></button>
-      </div>
-      <a class="btn buy" href="#">${sold?'Buy the print':'Add to cart'}</a>
-    </div>
+
+/* SHOP */
+document.getElementById('shopGrid').innerHTML=SKETCHES.map((s,i)=>{
+  const sold=s.originalSold;
+  return `<article class="product">
+    <div class="pic">${sold?'<span class="sold">Original sold</span>':''}
+      <img alt="${s.title} — ${s.place}" data-seed="p${i}" src="${s.image}"></div>
+    <h3>${s.title}</h3>
+    <span class="place">${s.place}</span>
+    <div class="price">Print ${money(s.print)} · <span class="orig">Original ${sold?'sold':money(s.original)}</span></div>
+    <a class="btn ink-outline add" href="#">${sold?'Buy print':'Add to cart'}</a>
   </article>`;
 }).join('');
 
-/* ---- JOURNAL ---- */
-document.getElementById('journalGrid').innerHTML = JOURNAL.map(j=>`
-  <article class="entry">
-    <div class="ph"><img alt="${j.place}" src="${washDataURI(j.wash||j.title)}"></div>
+/* COLLECTIONS */
+document.getElementById('collGrid').innerHTML=COLLECTIONS.map((c,i)=>`
+  <a class="tile" href="#"><img alt="${c.name}" data-seed="c${i}" src="${c.image}">
+    <span>${c.name}<small>${c.count} works</small></span></a>`).join('');
+
+/* JOURNAL */
+document.getElementById('journalGrid').innerHTML=JOURNAL.map((j,i)=>`
+  <article class="jentry">
+    <div class="ph"><img alt="${j.place}" data-seed="j${i}" src="${j.image}"></div>
     <span class="date">${j.date} · ${j.place}</span>
-    <h3>${j.title}</h3>
-    <p>${j.text}</p>
-    <a href="#">Read the page →</a>
+    <h3>${j.title}</h3><p>${j.text}</p>
   </article>`).join('');
 
-/* ---- MAP ---- */
+/* attach fallbacks to dynamically inserted imgs */
+document.querySelectorAll('img[data-seed]').forEach(el=>{
+  el.onerror=()=>{el.onerror=null;el.src=washURI(el.dataset.seed)};
+});
+
+/* MAP — auto-fit all cities, full width */
 let map;
 function initMap(){
-  if(typeof L==='undefined'){ return; }
-  map = L.map('map',{scrollWheelZoom:false, worldCopyJump:true}).setView([28,20],2);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:18
-  }).addTo(map);
+  if(typeof L==='undefined')return;
+  const pts=LOCATIONS.map(l=>[l.lat,l.lng]);
+  map=L.map('mapView',{scrollWheelZoom:false,attributionControl:false,zoomControl:true}).setView([25,40],2);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:18}).addTo(map);
+  L.control.attribution({prefix:false}).addAttribution('© OpenStreetMap, © CARTO').addTo(map);
 
-  const byCountry={};
-  const bounds=[];
   LOCATIONS.forEach(l=>{
     const col=colourOf[l.country];
-    const icon=L.divIcon({className:'',html:`<span class="pin" style="background:${col}"></span>`,
-      iconSize:[18,18], iconAnchor:[9,18]});
-    const m=L.marker([l.lat,l.lng],{icon}).addTo(map)
-      .bindTooltip(l.city,{className:'tt',direction:'top',offset:[0,-14]});
-    (byCountry[l.country]=byCountry[l.country]||[]).push([l.lat,l.lng]);
-    bounds.push([l.lat,l.lng]);
+    const inner=l.img?`background-image:url('${l.img}')`:'';
+    const face=l.img?'':(l.icon||'📍');
+    const icon=L.divIcon({className:'',html:`<div class="pin-circle" style="border:3px solid ${col};${inner}">${face}</div>`,iconSize:[44,44],iconAnchor:[22,22]});
+    L.marker([l.lat,l.lng],{icon}).addTo(map).bindTooltip(l.city,{className:'tt',direction:'top',offset:[0,-24]});
   });
-  if(bounds.length) map.fitBounds(bounds,{padding:[30,30]});
 
-  /* country legend with fly-to */
-  const list=document.getElementById('countryList');
-  list.innerHTML=countries.map(c=>{
-    const n=LOCATIONS.filter(l=>l.country===c).length;
-    return `<li><button data-c="${c}">
-      <span class="dot" style="background:${colourOf[c]}"></span>${c}
-      <span class="count">${n}</span></button></li>`;
-  }).join('');
-  list.addEventListener('click',e=>{
-    const btn=e.target.closest('button'); if(!btn) return;
-    const pts=byCountry[btn.dataset.c];
-    if(pts.length===1){ map.flyTo(pts[0],6,{duration:1}); }
-    else map.flyToBounds(pts,{padding:[40,40],duration:1});
-  });
+  const bounds=L.latLngBounds(pts);
+  function fit(){map.invalidateSize();map.fitBounds(bounds,{padding:[60,60]});}
+  fit();
+  setTimeout(fit,250);            // re-fit once the container has its real size
+  window.addEventListener('resize',()=>{clearTimeout(window.__rf);window.__rf=setTimeout(fit,200)});
 }
-if(document.readyState!=='loading') initMap();
-else document.addEventListener('DOMContentLoaded',initMap);
+if(document.readyState!=='loading')initMap();else document.addEventListener('DOMContentLoaded',initMap);
 
-/* ---- mobile menu ---- */
-const mb=document.querySelector('.menu-btn'), links=document.getElementById('links');
-mb.addEventListener('click',()=>{
-  const open=links.classList.toggle('open');
-  mb.setAttribute('aria-expanded',open);
-});
+/* nav + reveal */
+const mb=document.querySelector('.menu-btn'),links=document.getElementById('links');
+mb.addEventListener('click',()=>{const o=links.classList.toggle('open');mb.setAttribute('aria-expanded',o)});
 links.addEventListener('click',e=>{if(e.target.tagName==='A')links.classList.remove('open')});
-
-/* ---- scroll reveal ---- */
-const io=new IntersectionObserver((ents)=>{
-  ents.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}});
-},{threshold:.12});
+const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}})},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-
 document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
